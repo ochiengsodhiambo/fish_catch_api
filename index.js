@@ -67,7 +67,7 @@ app.get('/api/BHApiEndpoint', async (req, res) => {
 app.get('/api/BHApiEndpoint/:id', async (req, res) => {
   try {
     const result = await pool.request()
-      .input('id', sql.Int, req.params.id)
+      .input('id', sql.VarChar, req.params.id)  // Changed from sql.Int to sql.VarChar
       .query('SELECT * FROM dbo.fish_catch_view WHERE f_stock_id = @id');
     res.json(result.recordset[0] || {});
   } catch (err) {
