@@ -6,21 +6,38 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Parse connection string properly
+function parseConnectionString(connStr) {
+  const parts = {};
+  connStr.split(';').forEach(part => {
+    const [key, value] = part.split('=');
+    if (key && value) {
+      parts[key.trim()] = value.trim();
+    }
+  });
+  return parts;
+}
+
+const connParts = parseConnectionString(process.env.DATABASE_CONNECTION_STRING);
+const server = connParts['Server'].replace('tcp:', '').split(',')[0];
+const port = connParts['Server'].includes(',') ? parseInt(connParts['Server'].split(',')[1]) : 1433;
+
 const config = {
-  server: process.env.DATABASE_CONNECTION_STRING.split('Server=')[1].split(';')[0],
-  database: process.env.DATABASE_CONNECTION_STRING.split('Initial Catalog=')[1].split(';')[0],
+  server: server,
+  port: port,
+  database: connParts['Initial Catalog'],
   authentication: {
     type: 'default',
     options: {
-      userName: process.env.DATABASE_CONNECTION_STRING.split('User ID=')[1].split(';')[0],
-      password: process.env.DATABASE_CONNECTION_STRING.split('Password=')[1].split(';')[0]
+      userName: connParts['User ID'],
+      password: connParts['Password']
     }
   },
   options: {
-    encrypt: true,
-    trustServerCertificate: false,
-    connectTimeout: 120000,
-    requestTimeout: 120000
+    encrypt: connParts['Encrypt'] === 'True',
+    trustServerCertificate: connParts['TrustServerCertificate'] === 'True',
+    connectTimeout: parseInt(connParts['Connection Timeout']) * 1000 || 120000,
+    requestTimeout: parseInt(connParts['Command Timeout']) * 1000 || 120000
   }
 };
 
