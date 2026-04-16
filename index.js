@@ -55,20 +55,22 @@ async function initDb() {
 }
 
 // REST endpoint
+// Line 1: GET all records
 app.get('/api/BHApiEndpoint', async (req, res) => {
   try {
-    const result = await pool.request().query('SELECT * FROM dbo.fish_catch_view');
+    const result = await pool.request().query('SELECT * FROM dbo.fish_catch_view_v2');
     res.json(result.recordset);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
+// Line 2: GET by ID
 app.get('/api/BHApiEndpoint/:id', async (req, res) => {
   try {
     const result = await pool.request()
-      .input('id', sql.VarChar, req.params.id)  // Changed from sql.Int to sql.VarChar
-      .query('SELECT * FROM dbo.fish_catch_view WHERE f_stock_id = @id');
+      .input('id', sql.VarChar, req.params.id)
+      .query('SELECT * FROM dbo.fish_catch_view_v2 WHERE f_stock_id = @id');
     res.json(result.recordset[0] || {});
   } catch (err) {
     res.status(500).json({ error: err.message });
