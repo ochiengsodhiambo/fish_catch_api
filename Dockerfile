@@ -6,8 +6,16 @@
 #EXPOSE 5000
 #CMD ["dab", "start", "--config", "dab-config.json", "--host-mode", "production"]
 
-FROM dataapi/builder:1.7.93
+#FROM dataapi/builder:1.7.93
+#WORKDIR /app
+#COPY dab-config.json ./dab-config.json
+#EXPOSE 5000
+#CMD ["dab", "start", "--config", "dab-config.json", "--host-mode", "production"]
+
+FROM node:20-alpine
 WORKDIR /app
-COPY dab-config.json ./dab-config.json
+COPY package*.json ./
+RUN npm install
+COPY . .
 EXPOSE 5000
-CMD ["dab", "start", "--config", "dab-config.json", "--host-mode", "production"]
+CMD ["npm", "start"]
